@@ -2,7 +2,6 @@ import pygame
 from pygame import mixer
 
 
-
 class Paddle:
     width = 10
     height = 70
