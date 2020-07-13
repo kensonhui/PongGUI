@@ -69,29 +69,79 @@ class Ball:
         #top and bottom wall deflection
         if self.posy - self.radius <= 0 or self.posy + self.radius >= y_border:
             self.vely *= -1
+class TextBox:
+    def __init__(self, string, font, size, xpos, ypos):
+        self.string = string
+        self.font = font
+        self.size = size
+        self.xpos = xpos
+        self.ypos = ypos
+        self.create()
+
+    def create(self):
+        self.sysfont = pygame.font.SysFont('Arial', self.size)
+        self.render = self.sysfont.render(self.string, True, (255, 255, 255), (0, 0, 0,))
+        self.rect = self.render.get_rect()
+        self.rect.topleft = (self.xpos, self.ypos)
+    def hover(self):
+        self.sysfont = pygame.font.SysFont('Arial', self.size)
+        self.render = self.sysfont.render(self.string, True, (255, 255, 255), (0, 0, 0,))
+
+    def offhover(self):
+        self.sysfont = pygame.font.SysFont('Arial', self.size - 5)
+        self.render = self.sysfont.render(self.string, True, (255, 255, 255), (0, 0, 0,))
+
+    def blit(self, display):
+        display.blit(self.render, self.rect)
+
+def help_info():
+    click = False
+    title = TextBox("How to play", "Arial", 25, x_border/2, y_border/2)
+    info = TextBox("Player 1 uses the arrow keys Player 2 uses WASD", "Arial", 25, x_border/2 -200, y_border/2 + 50)
+    back = TextBox("Back", "Arial", 25, 50, 50)
+    help = True
+    
+
+    while help:
+        display.fill((0, 0, 0))
+        mx, my = pygame.mouse.get_pos()
+        back.blit(display)
+        title.blit(display)
+        info.blit(display)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+        if back.rect.collidepoint(mx, my):
+            back.hover()
+            if click:
+                break
+        else:
+            back.offhover()
+
+        click = False
+        pygame.display.update()
+
 
 def main_menu():
     menu = True
-    font = pygame.font.SysFont('Arial', 30)
-    title = font.render("Truly Amazing Pong", True, (255, 255, 255), (0, 0, 0))
-    titleBox = title.get_rect()
-    titleBox.topleft = (x_border/ 2, y_border /2 - 50)
-    startButtonText = font.render("Start!", True, (255, 255, 255), (0, 0, 0))
-    startButton = startButtonText.get_rect()
-    startButton.topleft = (x_border/2, y_border / 2)
-    helpButtonText = font.render("How to Play", True, (255, 255, 255) , (0, 0, 0))
-    helpButton = helpButtonText.get_rect()
-    helpButton.topleft = (x_border/2, y_border / 2 + 30)
+    title = TextBox("Truly Amazing Pong", "Arial", 30, x_border/ 2, y_border /2 - 50)
+    start = TextBox("Start", "Arial", 30, x_border/ 2, y_border /2)
+    help = TextBox("How to play", "Arial", 30, x_border/2, y_border / 2 + 50)
+
     #start = pygame.mixer.Sound("start.wav")
     #channel = pygame.mixer.Sound.play(start)
-
     
     while menu:
         mx, my = pygame.mouse.get_pos()
         display.fill((0,0,0))
-        display.blit(title, titleBox)
-        display.blit(startButtonText, startButton)
-        display.blit(helpButtonText, helpButton)
+        title.blit(display)
+        start.blit(display)
+        help.blit(display)
         click = False
         pygame.draw.rect(display, (255,255,255), (0, y_border / 2 - 15, x_border, 5), 0)
         
@@ -104,16 +154,21 @@ def main_menu():
                 if event.button == 1:
                     click = True
 
-        if startButton.collidepoint((mx, my)):
-            font = pygame.font.SysFont('Arial', 35, True)
-            startButtonText = font.render("Start!", True, (255, 255, 255), (0, 0, 0))
+        if start.rect.collidepoint((mx, my)):
+            start.hover()
             if click:
-                
                 break
         else:
-            click = False
-            font = pygame.font.SysFont('Arial', 30, False)
-            startButtonText = font.render("Start!", True, (255, 255, 255), (0, 0, 0))
+            start.offhover()
+
+        if help.rect.collidepoint((mx, my)):
+            help.hover()
+            if click:
+                help_info()
+        else:
+            help.offhover()
+
+        click = False
 
         pygame.display.update()
 
@@ -124,7 +179,7 @@ pygame.font.init()
 pygame.mixer.music.load("background1.mp3")
 pygame.mixer.music.play()
 
-x_border = 700
+x_border = 900
 y_border = 400
 x_margin = 10
 display = pygame.display.set_mode((x_border, y_border))
@@ -163,7 +218,8 @@ while run:
     ball.updateBall()
     
     display.fill((0,0,0))
-    pygame.draw.rect(display, (255, 255, 255), (x_border/2 - lineWidth/2, 0, lineWidth, y_border), 0)
+    border = pygame.draw.rect(display, (255, 255, 255), (x_border/2 - lineWidth/2, 0, lineWidth, y_border), 0)
+    border.center=(x_border/2, y_border/2)
     pygame.draw.circle(display, (255, 255, 255), (int(x_border/2), int(y_border/2)), Ball.radius + 19, 6 )
 
     pygame.draw.circle(display, ball.color, (ball.posx, ball.posy), ball.radius, 0 )
